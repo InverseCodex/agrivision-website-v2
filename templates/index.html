@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- Fonts Grouping Below-->
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='analysis.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='universal.css') }}">
+
+
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+
+         <!-- Make sure you put this AFTER Leaflet's CSS -->
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+
+    </head>
+
+    <body>
+        <!-- Main Container -->
+        <div class="main-container">
+
+            <!-- Navigation Bar Container -->
+            <div class="navbar-container">
+
+                <!-- User Info Container-->
+                <div class="navbar-user-container">
+                    <div class="user-icon-container">
+                        <ion-icon class="user-icon" name="person-outline"></ion-icon>
+                    </div>
+                    <div class="navbar-user-text-container">
+                        <h1>Welcome Back!</h1>
+                        <h2 class="user_id">{{ username }}</h2>
+                    </div>
+                </div>
+
+                <!-- Buttons Container -->
+                <div class="navbar-button-container">
+                    <a class="navbar-button navbar-button-active" id="drone-button" href="#">
+                        <ion-icon name="wifi-outline"></ion-icon>
+                        <p>Drone Connection</p>
+                    </a>
+
+                    <a class="navbar-button" id="mission-button" href="#">
+                        <ion-icon name="map-outline"></ion-icon>
+                        <p>Mission Planner</p>
+                    </a>
+
+                    <a class="navbar-button" id="analysis-button" href="#">
+                        <ion-icon name="bar-chart-outline"></ion-icon>
+                        <p>Analysis Result</p>
+                    </a>
+
+                    <a class="navbar-button" id="history-button" href="#">
+                        <ion-icon name="bookmark-outline"></ion-icon>
+                        <p>History</p>
+                    </a>
+                </div>
+
+                <!-- Logout Container -->
+                 <div class="logout-button-container">
+                    <a href="/logout" class="logout-button">
+                        <ion-icon name="exit-outline"></ion-icon>
+                        <p>LOG-OUT</p>
+                    </a>
+                 </div>
+
+            </div>
+
+            <!-- Content Container -->
+            <div class="content-container">
+                <div class="content-header-container">
+                    <div class="hamburger-container">
+                        <a class="hamburger-button">
+                        <ion-icon name="menu-outline"></ion-icon>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="content-boxes-container navbar-display">
+
+                    <!-- "Drone Connection" Section Part -->
+                    <div class="content-box active-content" id="drone-content">
+                        <div class="content-box-header">
+                            <h1>Drone Connection</h1>
+                            <p>Connect your Raspberry Pi to the Website</p>
+                        </div>
+
+                        <div class="api-container">
+                            
+                            <div class="api-container-header"></div> <!-- Empty just for decoration purpose-->
+
+                            <div class="api-container-text">
+                                <div class="api-container-text-main">
+                                    <span></span><ion-icon name="key-outline"></ion-icon>
+                                    <h1>Your API Key</h1>
+                                </div>
+                                <p>Enter this key into your Raspberry Pi to establish a connection</p>
+                            </div>
+
+                            <div class="api-container-content">
+                                <code>{{ user_id }}</code>
+                            </div>
+                        </div>
+
+                        <div class="connection-status-container">
+                            <div class="connection-status-header">
+                                <ion-icon name="wifi-outline"></ion-icon>
+                                <h1>Connection Status</h1>
+                            </div>
+
+                            <div class="connection-status">
+                                <div class="status-circle"></div> <!-- This is just a circle -->
+                                <div class="status-text status-text-inactive">
+                                    <ion-icon class="status-icon"name="wifi-outline"></ion-icon>
+                                    <p class="status-state">Disconnected</p>
+                                </div>
+
+                                <div class="status-flavor"><p>Waiting for drone to connect...</p></div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- "Mission Planner" Section -->
+                    <div class="content-box" id="mission-content">
+                        <div class="mission-content-header-container">
+                            <h1>Mission Planner</h1>
+                            <p>Click on the map to select your target location</p>
+                        </div>
+
+                        <div class="mission-content-container">
+
+                            <div class="left-content-container">
+                                <div id="map"></div>
+                            </div>
+
+                            <div class="right-content-container">
+                                <!-- Coordinates Section -->
+                                <div class="coordinates-text">
+                                    <div class="coordinates-header">
+                                        <ion-icon class="status-header-icon" name="locate-outline"></ion-icon>
+                                        <h1 class="status-header-text"> Target Coordinates </h1>
+                                    </div>
+
+
+                                    <div class="coordinates-lat">
+                                    
+                                        <p class="coordinates-info">Latitude</p>
+                                        <p id="latitude-value">0.00</p> <!-- This should change dynamically based on the latitude pointed by geoJSON -->
+                                    </div>
+
+                                    <div class="coordinates-long">
+                                        <p class="coordinates-info">Longitude</p>
+                                        <p id="longitude-value">0.00</p> <!-- This should change dynamically based on the longitude pointed by geoJSON -->
+                                    </div>
+                                </div>
+
+
+                                <!-- Mission Parameters Section -->
+                                <div class="mission-parameters-text">
+                                    <div class="mission-header">
+                                        <ion-icon class="status-header-icon" name="settings-outline"></ion-icon>
+                                        <h1 class="status-header-text">Mission Parameters</h1>
+                                    </div>
+                                    <div class="mission-alt">
+                                        <p class="altitude-info">Altitude</p>
+
+                                        <div class="altitude-input-wrap">
+                                            <input id="altitude-value" type="number" min="0" step="1" value="10" class="altitude-input">
+                                            <span class="altitude-unit">m</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <!-- Mission Status Section -->
+                                <div class="mission-status">
+                                    <div class="status-header">
+                                        <ion-icon class="status-header-icon" name="stats-chart-outline"></ion-icon>
+                                        <h1 class="status-header-text">Mission Status</h1>
+                                    </div>
+                                    <div class="mission-status-text">
+                                        <p class="mission-status-info">Ready to Launch</p>
+                                    </div>
+                                </div>
+
+
+                                <!-- Mission Buton Section -->
+                                <div class="mission-button-container">
+                                    <button type="button" id="upload-mission-btn" class="mission-button"> <!-- When this button is clicked it should produce the .json file and send it the same way images are transmitted-->
+                                        <p>UPLOAD MISSION</p>
+                                        <ion-icon class="mission-button-icon" name="send-outline"></ion-icon>
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- "Result Analysis" Section-->
+                    <div class="content-box" id="analysis-content">
+                        <div class="mission-content-header-container">
+                            <h1>Analyze Result</h1>
+                            <p>AI-powered crop health assessment</p>
+                        </div>
+                        <div class="analysis-content">
+                            <!-- This div should appear when no reults are loaded yet -->
+                            <div class="text-no-results" id="analysis-empty">
+                                <h1 class="no-results">NO RESULTS LOADED</h1>
+                                <p class="no-results">Load saved results in HISTORY</p>
+                            </div>
+                        </div>
+
+
+                        <!-- inactive class should be remove when a result is active-->
+                        <div class="analysis-content inactive" id="analysis-loaded">
+                        <!-- Image Results Container -->
+                        <div class="image-analysis-container">
+                            <div class="image-container-header">
+
+                                <div class="image-header-text">
+                                    <ion-icon name="image-outline"></ion-icon>
+                                    <h1>Image Preview</h1>
+                                </div>  
+
+                                <div class="image-header-toggle">
+                                    <p>Original</p>
+                                    <div class="image-header-toggle-container">
+                                        <button class="image-header-toggle-button">
+                                            <div class="circle-toggle inactive-circle"></div>
+                                        </button>
+                                    </div>
+                                    <p>AI View</p>
+                                </div>
+                            </div>
+                            
+                            <div class="image-container">
+                                <div class="image_holder image_active" id="original-image">
+                                    <!-- The original image placed here-->
+                                </div>
+
+                                <div class="image_holder"id="ai-view">
+                                    <!-- The image output of the model placed here-->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="analysis-result-container">
+                            <div class="analysis-result-container-header"></div>
+                            <div class="analysis-health-container">
+
+                                <div class="analysis-health-header">
+                                    <div class="analysis-health-title">
+                                        <ion-icon name="heart-outline"></ion-icon>
+                                        <h1>Health Score</h1>
+                                    </div>
+                                </div>
+
+                                <div class="analysis-health-value">
+                                    <div class="analysis-health-numbers">
+                                        <h1 id="analysis-health-number">78</h1> <!-- Make this dynamic based on the output -->
+                                        <p>/100</p>
+                                    </div>
+
+                                    <div class="analysis-health-bar">
+                                        <div class="analysis-health-total"></div>
+                                        <div class="analysis-health-progress"></div>
+                                    </div>
+
+                                    <div class="analysis-overall-value">
+                                        <div class="analysis-overall-healthy">
+                                            
+                                        </div>
+
+                                        <div class="analysis-overall-unhealthy">
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                        <div class="results-recommendation-container">
+                            <!-- Leave This -->
+                        </div>
+                    </div>  
+                </div>
+
+
+                <div class="content-box" id="history-content">
+                        <div class="mission-content-header-container">
+                            <h1>History</h1>
+                            <p>Load a result from here.</p>
+                        </div>
+
+                        <div class="history-content-container">
+                            <div class="history-content-container-header">
+                                <h1>Load a previous result</h1>
+                            </div>
+
+                            <div class="history-content-gallery-container" id="history-gallery">
+
+                                <!-- This is he entire gallery to be adjusted later in css-->
+                                 <!-- NOTICE THIS PART -->
+                                <div class="history-content-gallery-item">
+                                    <!-- Place the dynamic content here preferably so each of them can be styled later on-->
+                                     <!-- NOTICE THIS PART -->
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+        <script src="{{ url_for('static', filename='index.js') }}" defer></script>
+        <script src="{{ url_for('static', filename='analysis.js') }}" defer></script>
+        <script src="{{ url_for('static', filename='galleryLoader.js') }}" defer></script>
+        <script src="{{ url_for('static', filename='map.js') }}" defer></script>
+
+        <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+        <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    </body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+
+        <!-- Fonts Grouping Below-->
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='user_input.css') }}">
+    </head>
+    <body>
+        <div class="login-box">
+            <form method="POST">
+
+                <div class="input-side">
+                <div class="input-group">
+                    <input type="text" id="user" name="user" placeholder="Username" required>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="pass" name="pass"placeholder="Password" required>
+                </div>
+                </div>
+
+                <button type="submit">Login</button>
+            </form>
+
+            <p>Don't have an account yet? <a href="{{ url_for('register') }}">Click Here</a> to register to register</p>
+        </div>
+        <script src="{{ url_for('static', filename='analysis.js') }}" defer></script>
+    </body>
+</html>

@@ -1,0 +1,77 @@
+* {
+    box-sizing: border-box;
+    margin:0;
+    padding:0;
+    font-family: 'Rubik';
+    font-weight: 400;
+    color: white;
+}
+
+.inactive {
+    display: none;
+}
+
+#map .leaflet-pane img {
+    opacity: 1 !important;
+    display: block !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    display:flex;
+    box-sizing: border-box;
+    overflow: hidden;
+    font-family: 'Poppins', 'Roboto', 'Rubik', sans-serif;
+    width: 100vw;
+    height: 100vh;
+}
+.api-container,
+.connection-status-container {
+    box-shadow: 0 0.3rem 0.5rem rgba(0,0,0,0.3);
+}
+.coordinates-text p,
+.mission-parameters-text p,
+.mission-status p,
+.mission-button-container p,
+.coordinates-text h1,
+.mission-parameters-text h1,
+.mission-status h1,
+.mission-button-container h1  {
+    color: black;
+}
+
+.coordinates-header,
+.mission-header,
+.status-header {
+    display:flex;
+    align-items:center;
+    flex-direction: row;
+    width: 95%;
+    margin-top:5%;
+}
+
+.status-header-text {
+    font-weight: 500;
+    font-size:1rem;
+}
+
+.status-header-icon {
+    color:black;
+    font-size:1rem;
+    margin-right: 1rem;
+}
+
+.coordinates-text,
+.mission-parameters-text,
+.mission-status {
+    border: seagreen 1px solid;
+    box-shadow: 0 0.3rem 0.5rem rgba(0,0,0,0.3);
+}
+
+.image-header-text h1,
+.image-header-text ion-icon{
+    color: black;
+}

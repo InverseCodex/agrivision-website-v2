@@ -1,0 +1,596 @@
+.main-container {
+    height: 100vh;
+    width: 100vw;
+    margin:0;
+    padding:0;
+}
+
+
+/* NAVBAR CSS */
+.navbar-container {
+    background-color: #0F1F18;
+    width: 14%;
+    height: 100vh;
+    position:fixed;
+}
+
+.navbar-container-inactive {
+    transform: translateX(-14%);
+    transition: transform 1s ease;
+}
+
+.navbar-user-container {
+    display: flex;
+    flex-direction: row;
+    align-items:center;
+    justify-content:center;
+    border-bottom: #313131 solid 1px;
+    height: 10%;
+    padding: 0;
+}
+
+.user-icon {
+    color: white;
+    font-size:2rem;
+}
+
+.user-icon-container {
+    width: 2.7rem;
+    height: 2.7rem;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    border-radius:0.9rem;
+    background-image: linear-gradient(310deg, #138e74, #54dec0);
+    margin: 1.5rem;
+    margin-left: 0;
+}
+
+.navbar-user-text-container {
+    height: 2.7rem;
+    padding:0;
+    margin:0;
+    display:flex;
+    flex-direction:column;
+    justify-content: center;
+}
+
+.navbar-user-text-container h1{
+    font-size: 1rem;
+    letter-spacing: -0.04em;
+}
+
+.navbar-user-text-container h2{
+    font-size: 0.8rem;
+    font-weight:500;
+    color:#00f18d;
+    letter-spacing: -0.04em;
+}
+
+.navbar-button-container {
+    height: 80%;
+}
+.navbar-button {
+    display:flex;
+    flex-direction: row;
+    align-items:center;
+    border-radius: 0.7rem;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 1.2rem;
+    height: 2rem;
+    letter-spacing: -0.04em;
+    margin:1rem;
+    transition: transform 0.3s ease;
+}
+
+.navbar-button-active {
+    background-image: linear-gradient(to right,#1a6627 , #1b3b2e);
+    border-left: #34eb9c solid 0.2rem;
+    transform: translateX(0.3rem);
+}
+
+.navbar-button:hover {
+    transform: translateX(0.3rem);
+    background-color: #08140f;
+}
+
+.navbar-button p {
+    width: 60%;
+    font-size: 0.9rem;
+    color:rgb(112, 112, 112);
+    font-weight:500;
+    margin-left: 1rem;
+}
+
+.navbar-button-active p {
+    width: 60%;
+    font-size: 0.9rem;
+    color:rgb(147, 255, 194);
+    font-weight:500;
+    margin-left: 1rem;
+}
+
+.logout-button-container {
+    width: 100%;
+    height: 10%;
+    display:flex;
+    justify-content:center;
+}
+
+.logout-button-container a {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width: 60%;
+    height: 50%;    
+    background-image: linear-gradient(120deg,#1a6627 , #1b3b2e);
+    border-radius: 1rem;
+    transition: opacity 0.5s ease
+}
+
+.logout-button-container a:hover {
+    background-image: linear-gradient(120deg,#1a6627 , #1b3b2e);
+    opacity:0.7;
+    cursor:pointer;
+}
+
+.logout-button-container a ion-icon {
+    margin-right:1rem;
+}
+
+
+
+/* Content CSS */
+
+.content-container {
+    width: 100%;
+    height: 100%;
+    background-color: #F0F8F0;
+    transform: translateX(14%);
+    transition: transform 1s ease;
+}
+
+.inactive-navbar {
+    width: 100%;
+    transform: translateX(0%);
+    box-sizing: border-box;
+}
+
+.content-header-container {
+    width: 100%;
+    height:6%;
+    padding: 1rem;
+    box-sizing: border-box;
+    border-bottom: #cbd6cb 1px solid;    
+}
+
+.hamburger-button {
+    cursor: pointer;
+}
+
+.content-header-container ion-icon{
+    color:black;
+    font-size:1.5rem;
+}
+
+.content-header-container ion-icon:hover {
+    color:white;
+    font-size:1.5rem;
+    border-radius:0.6rem;
+    background-color: seagreen;
+}
+
+.hamburger-container {
+    width: 20%;
+}
+
+.content-boxes-container {
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    padding-right:0%;
+    transition: padding-right 1s ease;
+    width: 100%;
+    height: 94vh;
+}
+
+.content-box {
+    opacity:0;
+    flex-direction: column;
+    align-items:center;
+    width: 100%;
+    height: 0;
+    transform: translateY(15%);
+}
+
+.active-content {
+    display: flex;
+    opacity: 1;
+    height: 100%;
+    transform: translateY(0);
+    transition: transform 1s ease, opacity 1s ease;
+}
+
+
+.navbar-display {
+    padding-right: 14%;
+}
+
+/* DRONE CONNECTION CONTENT */
+
+.content-box-header,
+.api-container {
+    width: 50%;
+    margin-top: 1%;
+}
+
+.content-box-header h1{
+    color: rgb(116, 223, 162);
+    font-weight:500;
+    letter-spacing: -0.06rem;
+}
+
+.content-box-header p{
+    color:seagreen;
+}
+
+
+.api-container-header {
+    height: 5%;
+    background-image: linear-gradient(90deg,rgb(156, 255, 199), rgb(57, 190, 115),rgb(18, 163, 168));
+    background-size: 300% 300%;
+    animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+
+.api-container {
+    background-color: white;
+    height: 25%;
+    border-radius:2rem;
+    border: #a3b1a3, solid, 1px;
+}
+
+.api-container-text {
+    padding-left: 2rem;
+}
+
+.api-container-text-main {
+    margin:1rem;
+    margin-left:0;
+    display:flex;
+}
+
+.api-container-text h1 {
+    font-size: 1.7rem;
+    font-weight: 500;
+}
+
+.api-container-text h1,
+.api-container-text p{
+    color: black;
+}
+
+.api-container-text ion-icon {
+    width: 1.7rem;
+    height: 1.7rem;
+    background-color: rgb(199, 255, 199);
+    color: seagreen;
+    font-size: 1rem;
+    margin-right:1rem;
+}
+
+.api-container-content {
+    width: 80%;
+    height:20%;
+    display:flex;
+    align-items:center;
+    padding-left:1rem;
+    margin-left:2rem;
+    margin-top:2rem;
+    border-radius: 1rem;
+    border: rgb(206, 206, 206), solid, 1px;
+    background-color:rgb(233, 233, 233);
+}
+
+.api-container-content code {
+    color: black;
+    font-weight: 500;
+}
+
+.connection-status-container {
+    padding-left:2rem;
+    margin-top:2%;
+    width: 50%;
+    height: 15%;
+    border-radius: 2rem;
+    border: rgb(206, 206, 206), solid, 1px;
+    background-color: white;
+}
+
+.connection-status {
+    display:flex;
+    align-items: center;
+    margin-top:1rem;
+}
+
+.status-circle {
+    width: 0.8rem;
+    height: 0.8rem;
+    background-color:red;
+    border-radius: 0.8rem;
+    margin-right: 1rem;
+}
+
+.status-text {
+    display: flex;
+    justify-content:center;
+    background-color:rgb(0, 255, 179);
+    width: 20%;
+    border-radius:1rem;
+    margin-right: 2rem;
+}
+
+.status-text-inactive {
+    background-color:rgb(255, 192, 192);
+}
+
+.status-icon {
+    margin-right: 0.3rem;
+}
+
+.connection-status-container h1,
+.connection-status-container p,
+.connection-status-container .status-icon {
+    color: black;
+}
+
+/* MISSION PLANNER CONTENT */
+.mission-content-header-container {
+    margin-top: 1rem;
+    padding-left: 2rem;
+    width: 100%;
+    height: 10%;
+}
+
+.mission-content-header-container h1{
+    color: rgb(116, 223, 162);
+    font-weight: 500;
+}
+
+.mission-content-header-container p {
+    color: seagreen;
+}
+
+.mission-content-container {
+    width: 100%;
+    height: 90%;
+    display: flex;
+    flex-direction: row;
+    padding-left: 2rem;
+}
+
+.left-content-container {
+    width: 90%;
+    height: 90%;
+    margin-right: 2%;
+    border-radius: 2rem;
+    overflow: hidden;
+}
+
+.altitude-input-wrap {
+    display: flex;
+    flex-direction: row;
+}
+
+.altitude-input-wrap input {
+    width: 60%;
+    margin-right: 20%;
+    color: black;
+}
+#map { 
+    overflow: visible;
+    height: 100%;
+    width: 100%;
+ }
+
+.right-content-container {
+    width: 35%;
+    height: 90%;
+    border-radius: 2rem;
+}
+
+.coordinates-text,
+.mission-parameters-text,
+.mission-status,
+.mission-button-container {
+    margin-top:5%;
+    margin-left:5%; 
+    padding-left:1.2rem;
+    width: 90%;
+    color:black;
+    background-color:white;
+    border-radius:2rem;
+}
+
+.coordinates-text {
+    height: 25%;
+}
+
+.coordinates-header {
+    display:flex;
+    flex-direction: row;
+    margin-bottom: 0.5rem;
+    margin-top:1rem;
+}
+
+.coordinates-lat,
+.coordinates-long {
+    display:flex;
+    flex-direction: row;
+    align-items:center;
+    padding-left: 5%;
+    width: 95%;
+    height: 23%;
+    margin-bottom: 0.5rem;
+    border-radius: 1rem;
+    background-color:yellow;
+    display:flex;
+    flex-direction: row;
+}
+
+.coordinates-info {
+    width: 75%;
+}
+
+/* Mission Parameters Section */
+
+.mission-parameters-text {
+    height: 18%;
+    padding-left: 5%;
+}
+
+.mission-alt {
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    width: 95%;
+    height:30%;
+    padding-left:5%;
+    margin-top: 0.5rem;
+    border-radius:0.7rem;
+    background-color:yellow
+}
+
+.altitude-info {
+    width: 75%;
+}
+
+/* Mission Status Section */
+
+.mission-status {
+    padding-left: 5%;
+    height:17%;
+}
+
+.mission-status-text {
+    display:flex;
+    align-items:center;
+    margin-top: 0.5rem;
+    border-radius: 0.7rem;
+    padding-left: 5%;
+    width:95%;
+    height:30%;
+    background-color:yellow;
+}
+
+/* Mission Button Section */
+.mission-button-container {
+    display:flex;
+    height: 10%;
+    padding:0;
+    justify-content:center;
+    border:rgba(140, 228, 178, 0.781) solid 2px;
+    align-items:center;
+}
+
+.mission-button {
+    display:flex;
+    width:100%;
+    height:100%;
+    background-image: linear-gradient(to right, #5edaaa, #44c2b1, #93cad8);
+    justify-content:center;
+    align-items:center;
+}
+
+.mission-button p {
+    color: white;
+    font-size:1.2rem;
+    font-weight:500;
+}
+.mission-button-icon {
+    margin-left: 1rem;
+    font-size:1.2rem;
+}
+
+.mission-button:hover {
+    cursor: pointer;
+    background-image: linear-gradient(to right, #41b689, #2c8f82, #6199a7);
+    background-size: 300% 300%;
+    animation: gradientShift 3s ease infinite;
+}
+
+/* Bar Colors */
+.coordinates-lat {
+    background-color:beige;
+    border:rgb(212, 212, 169) 1px solid;
+}
+
+.coordinates-long {
+    background-color:violet;
+    border: rgb(177, 77, 177) 1px solid;
+}
+
+.mission-alt {
+    background-color:skyblue;
+    border: rgb(91, 171, 202) 1px solid;
+}
+
+.mission-status-text {
+    background-color: rgb(241, 136, 136);
+    border: rgb(194, 88, 88) 1px solid;
+    color:white;
+}
+
+#history-gallery{
+  display:flex;
+  flex-direction:column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.history-card{
+  background:#fff;
+  border-radius:14px;
+  border:1px solid rgba(0,0,0,0.08);
+  overflow:hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.history-card-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding: 0.8rem 1rem;
+  gap: 1rem;
+}
+
+.history-meta{ display:flex; flex-direction:column; gap:0.2rem; }
+.history-filename{ margin:0; font-weight:600; }
+.history-time{ margin:0; font-size:0.85rem; opacity:0.7; }
+
+.history-load-btn{
+  padding:0.5rem 0.9rem;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.history-thumb img{
+  width:100%;
+  height:220px;
+  object-fit:cover;
+  display:block;
+}
