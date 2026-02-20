@@ -20,7 +20,7 @@ OUT_PATH = Path("mission.json")
 def poll_latest_mission_for_user():
     while True:
         try:
-            # 1) Get latest pending mission for this user
+            
             r = requests.get(
                 f"{BASE}/device/missions/latest",
                 params={"user_id": USER_ID},

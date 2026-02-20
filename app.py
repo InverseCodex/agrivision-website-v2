@@ -548,7 +548,7 @@ def device_missions_ack():
 
     # (Optional) ensure this mission belongs to that user
     check = (
-        supabase.table("deviceMissions")
+        supabase.table("userMissions")
         .select("requested_by, requested_at, status")
         .eq("requested_at", mission_id)
         .eq("requested_by", user_id )
@@ -562,7 +562,8 @@ def device_missions_ack():
     row = check.data[0]
     if row["requested_by"] != user_id:
         return {"error": "forbidden"}, 403
-
+    
+    #Problem part
     upd = (
         supabase.table("userMissions")
         .update({
