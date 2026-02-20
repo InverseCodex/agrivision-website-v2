@@ -317,9 +317,9 @@ def mission_upload():
     storage = supabase.storage.from_(MISSION_BUCKET)
 
     up = storage.upload(
-    path=storage_path,
-    file=json.dumps(payload).encode("utf-8"),
-    file_options={"content-type": "application/json"}
+        path=storage_path,
+        file=json.dumps(payload).encode("utf-8"),
+        file_options={"content-type": "application/json"}
     )   
 
     return {
@@ -339,25 +339,14 @@ def device_mission_poll():
     if not request_id or not device_id:
         return {"error": "request_id and device_id required"}, 400
 
-    # Verify request is paired and device matches
-    r = supabase.table("deviceRequests").select("id, status, paired_device_id").eq("id", request_id).execute()
-    if not r.data:
-        return {"error": "invalid request_id"}, 404
-
-    req_row = r.data[0]
-    if req_row.get("status") != "paired":
-        return {"error": "not paired"}, 400
-    if str(req_row.get("paired_device_id")) != str(device_id):
-        return {"error": "device mismatch"}, 403
-
+    
     # Get newest pending mission
     m = (
         supabase.table("userMissions")
-        .select("requested_by, mission, created_at")
-        .eq("request_id", request_id)
-        .eq("device_id", device_id)
+        .select("requested_by, requested_at, status")
+        .eq("requested_by", request_id)
         .eq("status", "pending")
-        .order("created_at", desc=True)
+        .order("requested_at", desc=True)
         .limit(1)
         .execute()
     )
@@ -367,11 +356,25 @@ def device_mission_poll():
 
     row = m.data[0]
 
+    latest = (
+    supabase.table("userMissions")
+    .select("requested_at")
+    .eq("requested_by", user_id)
+    .eq("status", "pending")
+    .order("requested_at", desc=True)
+    .limit(1)
+    .execute()
+    )
+
+    if not latest.data:
+        return {"error": "No pending missions found"}, 404
+
+    latest_requested_at = latest.data[0]["requested_at"]
+
     # Mark delivered
-    supabase.table("deviceMissions").update({
+    supabase.table("userMissions").update({
         "status": "delivered",
-        "delivered_at": datetime.utcnow().isoformat()
-    }).eq("id", row["id"]).execute()
+    }).eq(["requested_by", request_id]).eq("requested_at", latest_requested_at).execute()
 
     return {"mission_id": row["id"], "mission": row["mission"], "created_at": row.get("created_at")}
 
@@ -497,29 +500,6 @@ def analysis_run():
 # =========================
 # GEOJSON (testing)
 # =========================
-''' #Remove this to add it back
-
-@app.route("/geojson/targets")
-
-def geojson_targets():
-    sample = {
-        "type": "FeatureCollection",
-        "features": [
-            {
-                "type": "Feature",
-                "properties": {"name": "Target A"},
-                "geometry": {"type": "Point", "coordinates": [120.9842, 14.5995]}
-            },
-            {
-                "type": "Feature",
-                "properties": {"name": "Target B"},
-                "geometry": {"type": "Point", "coordinates": [121.0500, 14.6500]}
-            }
-        ]
-    }
-    return sample
-
-'''
 
 @app.route("/device/missions/latest", methods=["GET"])
 def device_missions_latest():
@@ -531,11 +511,11 @@ def device_missions_latest():
         return {"error": "user_id required"}, 400
 
     resp = (
-        supabase.table("deviceMissions")
-        .select("id, mission, status, created_at")
+        supabase.table("userMissions")
+        .select("requested_by, requested_at, status")
         .eq("requested_by", user_id)
         .eq("status", "pending")
-        .order("created_at", desc=True)
+        .order("requested_at", desc=True)
         .limit(1)
         .execute()
     )
@@ -562,7 +542,7 @@ def device_missions_ack():
     Marks mission delivered so it won't be returned again.
     """
     payload = request.get_json(silent=True) or {}
-    mission_id = payload.get("mission_id")
+    mission_id = payload.get("requested_at")
     user_id = payload.get("user_id")
 
     if not mission_id or not user_id:
@@ -571,8 +551,9 @@ def device_missions_ack():
     # (Optional) ensure this mission belongs to that user
     check = (
         supabase.table("deviceMissions")
-        .select("id, requested_by, status")
-        .eq("id", mission_id)
+        .select("requested_by, requested_at, status")
+        .eq("requested_at", mission_id)
+        .eq("requested_by", user_id )
         .limit(1)
         .execute()
     )
@@ -585,10 +566,9 @@ def device_missions_ack():
         return {"error": "forbidden"}, 403
 
     upd = (
-        supabase.table("deviceMissions")
+        supabase.table("userMissions")
         .update({
             "status": "delivered",
-            "delivered_at": datetime.utcnow().isoformat()
         })
         .eq("id", mission_id)
         .execute()
