@@ -525,10 +525,23 @@ def device_missions_latest():
 
     row = resp.data[0]
     return {
+        "requested_by": user_id,
         "mission_id": row["requested_at"],
         "status": row.get("status"),
     }, 200
 
+@app.route("/device/missions/download", methods=["GET"])
+def missions_download():
+    user_id = request.args.get("requested_by")
+    mission_id = request.args.get("requested_at")
+
+    if not user_id or not mission_id:
+        return {"error": "requested_by and requested_at required"}, 400
+
+    storage = supabase.storage.from_(MISSION_BUCKET)
+    file_path = f"{user_id}/{mission_id}.json"   # bucket-relative path
+
+    return redirect(storage.get_public_url(file_path))
 
 @app.route("/device/missions/ack", methods=["POST"])
 def device_missions_ack():

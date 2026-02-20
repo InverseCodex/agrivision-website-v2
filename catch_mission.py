@@ -1,6 +1,5 @@
 # wait_for_mission.py
 # Raspberry Pi: poll Flask server for the LATEST mission for this USER_ID.
-# It grabs the newest row in deviceMissions where requested_by == USER_ID and status == "pending",
 # saves mission.json, then ACKs it (marks delivered) so it won't be re-downloaded.
 #
 # pip install requests
@@ -33,14 +32,38 @@ def poll_latest_mission_for_user():
                 continue
 
             data = r.json()
+            print(data)
+            
+            requested_by = data.get("requested_by")
+            requested_at = data.get("mission_id")
 
             if not data or data.get("mission_id") is None:
                 print("No mission yet... waiting")
                 time.sleep(POLL_SECONDS)
                 continue
 
-            mission = data["mission_id"]
-            print(f"Mussion received! id={mission}")
+            # mission becomes the JSON file content that matches requested_at + requested_by
+            dl = requests.get(
+                f"{BASE}/device/missions/download",
+                params={"requested_at": requested_at, "requested_by": requested_by},
+                timeout=20,
+                allow_redirects=True,
+            )
+
+            print(f"Mission received! id={requested_at}")
+
+            if dl.status_code != 200:
+                print("DOWNLOAD:", dl.status_code, dl.text[:200])
+                time.sleep(POLL_SECONDS)
+                continue
+
+            # Now parse JSON from the final response body
+            try:
+                mission = dl.json()
+            except Exception:
+                print("DOWNLOAD returned non-JSON:", dl.headers.get("Content-Type"), dl.text[:200])
+                time.sleep(POLL_SECONDS)
+                continue
 
             OUT_PATH.write_text(json.dumps(mission, indent=2), encoding="utf-8")
             print(f"Saved to: {OUT_PATH.resolve()}")
@@ -49,7 +72,7 @@ def poll_latest_mission_for_user():
             if mission:
                 ack = requests.post(
                     f"{BASE}/device/missions/ack",
-                    json={"requested_at": mission, "user_id": USER_ID},
+                    json={"requested_at": requested_at, "user_id": USER_ID},
                     timeout=20,
                 )
                 print("ACK:", ack.status_code, ack.text)
