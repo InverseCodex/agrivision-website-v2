@@ -34,23 +34,22 @@ def poll_latest_mission_for_user():
 
             data = r.json()
 
-            if not data or data.get("mission") is None:
+            if not data or data.get("mission_id") is None:
                 print("No mission yet... waiting")
                 time.sleep(POLL_SECONDS)
                 continue
 
-            mission = data["mission"]
-            mission_id = data.get("mission_id") or data.get("id")
-            print(f"Mussion received! id={mission_id}")
+            mission = data["mission_id"]
+            print(f"Mussion received! id={mission}")
 
             OUT_PATH.write_text(json.dumps(mission, indent=2), encoding="utf-8")
             print(f"Saved to: {OUT_PATH.resolve()}")
 
             # 2) ACK it (so next poll doesn't return the same mission)
-            if mission_id:
+            if mission:
                 ack = requests.post(
                     f"{BASE}/device/missions/ack",
-                    json={"mission_id": mission_id, "user_id": USER_ID},
+                    json={"requested_at": mission, "user_id": USER_ID},
                     timeout=20,
                 )
                 print("ACK:", ack.status_code, ack.text)

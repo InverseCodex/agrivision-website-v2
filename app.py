@@ -569,14 +569,14 @@ def device_missions_ack():
         .update({
             "status": "delivered",
         })
-        .eq("id", mission_id)
+        .eq("requested_at", mission_id)
         .execute()
     )
 
     if not upd.data:
         return {"error": f"ack update failed: {upd.error}"}, 500
 
-    return {"message": "acked", "mission_id": mission_id}, 200
+    return {"message": "acked", "requested_at": mission_id}, 200
 
 
 if __name__ == "__main__":
