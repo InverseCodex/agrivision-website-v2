@@ -19,6 +19,7 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 IMAGE_BUCKET = os.getenv("SUPABASE_IMAGE_BUCKET", "image_transmission")
+MISSION_BUCKET = os.getenv("SUPABASE_MISSION_BUCKET", "mission_transmission")
 
 PAIR_EXP_MINUTES = 10
 
@@ -118,6 +119,8 @@ def logout():
 # =========================
 # DEVICE PAIRING
 # =========================
+
+'''
 @app.route("/requests/create", methods=["POST"])
 def create_device_request():
     if "user_id" not in session:
@@ -149,8 +152,9 @@ def create_device_request():
         "expires_at": row.get("expires_at"),
         "status": row.get("status")
     }
+'''
 
-
+'''
 @app.route("/device/connect", methods=["POST"])
 def device_connect():
     payload = request.get_json(silent=True) or {}
@@ -194,6 +198,7 @@ def device_connect():
         "requested_by": req_row["requested_by"],
         "requested_at": req_row.get("requested_at")
     }
+'''
 
 
 @app.route("/device/connect_user", methods=["POST"])
@@ -227,35 +232,28 @@ def device_connect_user():
 # =========================
 # DEVICE -> WEBSITE IMAGE UPLOAD
 # =========================
+
 @app.route("/device/upload", methods=["POST"])
 def device_upload():
-    request_id = request.form.get("request_id")
-    device_id = request.form.get("device_id")
+
+    user_id = request.form.get("user_id")
+    date_today = datetime.utcnow().strftime("%Y%m%d")
     file = request.files.get("image")
 
-    if not request_id or not file:
+    if not user_id or not file:
         return {"error": "request_id and image file required"}, 400
 
-    resp = supabase.table("deviceRequests").select("*").eq("id", request_id).execute()
+    resp = supabase.table("userAccounts").select("*").eq("user_id", user_id).execute() #Checks if user actually exists
     if not resp.data:
         return {"error": "invalid request_id"}, 404
-
-    req_row = resp.data[0]
-    if req_row.get("status") != "paired":
-        return {"error": f"request not paired (status={req_row.get('status')})"}, 400
-
-    if device_id and req_row.get("paired_device_id") and str(device_id) != str(req_row["paired_device_id"]):
-        return {"error": "device_id does not match paired device"}, 403
-
-    requested_by = req_row["requested_by"]
 
     original_name = file.filename or "image"
     ext = ""
     if "." in original_name:
         ext = "." + original_name.rsplit(".", 1)[1].lower()
 
-    storage_name = f"{uuid.uuid4()}{ext}"
-    storage_path = f"{request_id}/{requested_by}/{storage_name}"
+    file_name = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    storage_path = f"{user_id}/{date_today}/{file_name}{ext}"
 
     file_bytes = file.read()
     content_type = file.mimetype or "application/octet-stream"
@@ -270,37 +268,31 @@ def device_upload():
     if isinstance(up, dict) and up.get("error"):
         return {"error": up["error"]}, 500
 
-    ins = supabase.table("requestImages").insert({
-        "request_id": request_id,
-        "requested_by": requested_by,
-        "image_path": storage_path,
-        "original_filename": original_name,
-        "content_type": content_type
+    ins = supabase.table("imageReceived").insert({
+        "requested_by": user_id,
+        "uploaded_at": storage_path
     }).execute()
 
     if not ins.data:
         return {"error": f"metadata insert failed: {ins.error}"}, 500
 
-    return {"message": "uploaded", "request_id": request_id, "image_path": storage_path}
+    return {"message": "uploaded", "requested_by": user_id, "image_path": storage_path}
 
 
 # =========================
 # WEBSITE -> DEVICE MISSION (queue + poll)
 # Requires a table: public.deviceMissions (jsonb mission, status, request_id, device_id)
 # =========================
+
 @app.route("/mission/upload", methods=["POST"])
 def mission_upload():
-    """
-    Called by your website when you click UPLOAD MISSION.
-    It queues the mission for the latest paired device of this user.
-    Accepts JSON body:
-      { "target": { "lat":..., "lng":..., "alt_m":... }, ... }
-    """
+
     if "user_id" not in session:
         return {"error": "Not logged in"}, 401
 
     payload = request.get_json(silent=True) or {}
     mission = payload.get("mission") or payload
+    current_date = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
 
     tgt = (mission or {}).get("target") or {}
     if tgt.get("lat") is None or tgt.get("lng") is None or tgt.get("alt_m") is None:
@@ -308,32 +300,11 @@ def mission_upload():
 
     user_id = session["user_id"]
 
-    # Find latest paired device request for this user
-    r = (
-        supabase.table("deviceRequests")
-        .select("id, status, paired_device_id, requested_by, requested_at")
-        .eq("requested_by", user_id)
-        .eq("status", "paired")
-        .order("requested_at", desc=True)
-        .limit(1)
-        .execute()
-    )
-    if not r.data:
-        return {"error": "No paired device found. Pair your Raspberry Pi first."}, 400
-
-    req_row = r.data[0]
-    request_id = req_row["id"]
-    device_id = req_row.get("paired_device_id")
-    if not device_id:
-        return {"error": "paired_device_id missing for this request"}, 400
-
     ins = (
-        supabase.table("deviceMissions")
+        supabase.table("userMissions")
         .insert({
-            "request_id": request_id,
             "requested_by": user_id,
-            "device_id": device_id,
-            "mission": mission,
+            "requested_at": current_date,
             "status": "pending",
         })
         .execute()
@@ -342,24 +313,27 @@ def mission_upload():
     if not ins.data:
         return {"error": f"mission queue insert failed: {ins.error}"}, 500
 
+    storage_path = f"{user_id}/{current_date}.json"
+    storage = supabase.storage.from_(MISSION_BUCKET)
+
+    up = storage.upload(
+    path=storage_path,
+    file=json.dumps(payload).encode("utf-8"),
+    file_options={"content-type": "application/json"}
+    )   
+
     return {
-        "message": "mission queued",
-        "request_id": request_id,
-        "device_id": device_id,
-        "mission_id": ins.data[0]["id"],
+        "message": "Mission has been queued",
+        "requested_by": user_id,
+        "requested_at": current_date,
     }
 
 
 @app.route("/device/mission/poll", methods=["POST"])
 def device_mission_poll():
-    """
-    Called by Raspberry Pi (polling):
-      POST { "request_id": "...", "device_id": "..." }
-    Returns:
-      { "mission": null } or { "mission_id": "...", "mission": {...} }
-    """
+
     payload = request.get_json(silent=True) or {}
-    request_id = payload.get("request_id")
+    request_id = payload.get("user_id")
     device_id = payload.get("device_id")
 
     if not request_id or not device_id:
@@ -378,8 +352,8 @@ def device_mission_poll():
 
     # Get newest pending mission
     m = (
-        supabase.table("deviceMissions")
-        .select("id, mission, created_at")
+        supabase.table("userMissions")
+        .select("requested_by, mission, created_at")
         .eq("request_id", request_id)
         .eq("device_id", device_id)
         .eq("status", "pending")
@@ -436,7 +410,7 @@ def history_images():
 
     return {"images": images}
 
-
+''' #Study this later for ML
 @app.route("/analysis/run", methods=["POST"])
 def analysis_run():
     if "user_id" not in session:
@@ -518,12 +492,15 @@ def analysis_run():
         "result_url": result_url,
         "metrics": {"health_score": ml_json.get("health_score", 0)}
     }
-
+'''
 
 # =========================
 # GEOJSON (testing)
 # =========================
+''' #Remove this to add it back
+
 @app.route("/geojson/targets")
+
 def geojson_targets():
     sample = {
         "type": "FeatureCollection",
@@ -541,15 +518,15 @@ def geojson_targets():
         ]
     }
     return sample
+
+'''
+
 @app.route("/device/missions/latest", methods=["GET"])
 def device_missions_latest():
-    """
-    Raspberry Pi polls this:
-      GET /device/missions/latest?user_id=...
 
-    Returns latest pending mission for that user (requested_by).
-    """
+      #GET /device/missions/latest?user_id=...
     user_id = request.args.get("user_id")
+
     if not user_id:
         return {"error": "user_id required"}, 400
 

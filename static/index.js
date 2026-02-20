@@ -310,7 +310,6 @@ if (uploadBtn) {
 
       const missionObj = {
         target: { lat, lng, alt_m: alt },
-        created_at: new Date().toISOString(),
       };
 
       const res = await fetch("/mission/upload", {
