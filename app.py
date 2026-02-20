@@ -525,10 +525,8 @@ def device_missions_latest():
 
     row = resp.data[0]
     return {
-        "mission_id": row["id"],
-        "mission": row["mission"],
+        "mission_id": row["requested_at"],
         "status": row.get("status"),
-        "created_at": row.get("created_at"),
     }, 200
 
 

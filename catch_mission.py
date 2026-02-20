@@ -35,7 +35,7 @@ def poll_latest_mission_for_user():
             data = r.json()
 
             if not data or data.get("mission") is None:
-                print("No m8ssion yet... waiting")
+                print("No mission yet... waiting")
                 time.sleep(POLL_SECONDS)
                 continue
 
